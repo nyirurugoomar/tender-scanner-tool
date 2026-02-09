@@ -1,0 +1,78 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+    container_name: tender-scanner-tool-postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql
+    ports:
+      - '${DB_PORT}:5432'
+    networks:
+      - tender-scanner-tool-net
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tender-scanner-tool-app
+    environment:
+      - PORT=${PORT}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
+    ports:
+      - '${PORT}:${PORT}'
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+    networks:
+      - tender-scanner-tool-net
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/healthCheck']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: tender-scanner-tool-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - '${PGADMIN_HOST_PORT}:${PGADMIN_CONTAINER_PORT}'
+    depends_on:
+      - db
+    networks:
+      - tender-scanner-tool-net
+
+  redis:
+    image: redis
+    container_name: tender-scanner-tool-redis
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
+    restart: always
+    networks:
+      - tender-scanner-tool-net
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  tender-scanner-tool-net:
+    driver: bridge
