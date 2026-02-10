@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Requirement } from '../../requirements/entities/requirement.entity';
 
 
 
@@ -19,8 +20,8 @@ export class Tender {
   @Column({ default: 'OPEN' })
   status: string;
 
-//   @OneToMany(() => Requirement, r => r.tender)
-//   requirements: Requirement[];
+  @OneToMany(() => Requirement, r => r.tender)
+  requirements: Requirement[];
 
 //   @OneToMany(() => Submission, s => s.tender)
 //   submissions: Submission[];

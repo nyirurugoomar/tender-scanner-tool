@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TendersModule } from './tenders/tenders.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RequirementsModule } from './requirements/requirements.module';
 
 
 @Module({
@@ -16,7 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true, // Set to false in production
     autoLoadEntities: true,
-  }),TendersModule],
+  }),TendersModule, RequirementsModule],
   controllers: [AppController],
   providers: [AppService],
 })
